@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        <form action="{% url 'add_auction'%}">
+            <div class="form-group">
+                <label for="name">Name: </label>
+                <input type="text" name="name" class="form-control" placeholder="Product Name">
+            </div>
+            <div class="form-group">
+                <label for="desciption">Description: </label>
+                <textarea class="form-control" name="description" id="" cols="30" rows="10" maxlength="400"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <input class="form-control"type="text" name="category" placeholder="Category">
+            </div>
+            <div class="form-group">
+                <label for="image">URL Image:</label>
+                <input class="form-control" type="text" name="image" placeholder="URL">
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
