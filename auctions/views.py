@@ -66,8 +66,21 @@ def register(request):
 # Listing function
 @login_required(login_url='/login')
 def add_auction(request):
-    # if request.method == "POST":
-    #     title = request.POST["title"]
-    #     date_creation = request.POST["date_creation"]
-
+    if request.method == "POST":
+        name = request.POST["name"]
+        description = request.POST["description"]
+        category = request.POST["category"]
+        image = request.POST["image"]
+        bid_start = request.POST["bid_start"]
+        owner = request.POST["owner"]
+        user_owner = User.objects.get(username=owner)
+        try:
+            listing = auctions_listing(name=name, description=description,
+                                       category=category, image=image, start_bid=bid_start, owner=user_owner)
+            listing.save()
+            return HttpResponseRedirect(reverse("index"))
+        except IntegrityError:
+            return render(request, "auctions/add_auction.html", {
+                "message": "Error, the auction cannot be added"
+            })
     return render(request, "auctions/add_auction.html")

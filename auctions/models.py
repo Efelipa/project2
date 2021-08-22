@@ -12,11 +12,11 @@ class auctions_listing(models.Model):
     date_creation = models.DateTimeField(auto_now_add=True, blank=True)
     description = models.CharField(max_length=400)
     category = models.CharField(max_length=64, blank=True)
-    image = models.CharField(max_length=265)
+    image = models.CharField(max_length=300)
     start_bid = models.IntegerField()
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="owner_list")
-    active = models.BooleanField()
+    active = models.BooleanField(default=True)
     winner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="winner_list", null=True, blank=True)
 

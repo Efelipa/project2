@@ -2,7 +2,11 @@
 
 {% block body %}
     <div class="container">
-        <form action="{% url 'add_auction'%}">
+        {% if message %}
+            {{message}}
+        {% endif %}
+        <form action="{% url 'add_auction'%}" method="post">
+            {% csrf_token %}
             <div class="form-group">
                 <label for="name">Name: </label>
                 <input type="text" name="name" class="form-control" placeholder="Product Name">
@@ -19,7 +23,14 @@
                 <label for="image">URL Image:</label>
                 <input class="form-control" type="text" name="image" placeholder="URL">
             </div>
+            <div class="form-group">
+                <label for="bid_start">Starting Bid:</label>
+                <input class="form-control" type="text" name="bid_start" placeholder="9999">
+            </div>
+            <div class="form-group">
+                <input name="owner" type='hidden' value='{{ user.username }}'>
+                <input type="submit" value="Create" class="btn btn-secondary">
+            </div>
         </form>
     </div>
-
 {% endblock %}
