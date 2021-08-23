@@ -1,9 +1,27 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <div class="container">
-        <h2>Active Listings</h2>
-        TODO
+<div class="container">
+    <h2>Active Listings</h2>
+    <div class="row">
+        {% for list in lists %}
+            {% if list.active == True %} 
+                <div class="col-md-4">
+                    <div class="card">
+                        <img src="{{list.image}}" alt="{{list.name}}" class="card-img-top" height="350px">
+                        <div class="card-body">
+                            <h3 class="card-title">{{list.name}}</h3>
+                            <p"><a href="#" class="font-weight-bold text-body">{{list.category}}</a></p>      
+                            <div class="col-12 text-truncate mb-3">
+                                {{list.description}}
+                            </div>
+                            <a href="" class="btn btn-secondary">View Auction</a>
+                        </div>            
+                    </div>
+                </div>
+                <div class="border border-secondary"></div>
+            {% endif %}
+        {% endfor %}
     </div>
 
 {% endblock %}
