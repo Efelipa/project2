@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
+from django.db.models.expressions import Value
 from django.forms.widgets import Widget
-from django.http import HttpResponse, HttpResponseRedirect, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404, HttpResponseBadRequest
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -12,7 +13,7 @@ from django import forms
 
 class bid_form(forms.Form):
     bid_form = forms.IntegerField(required=True, label=(
-        "Make a Bid"))
+        "Make a Bid"), )
     bid_form.widget.attrs.update({"class": "form-control"})
 
 
@@ -110,8 +111,8 @@ def list_pages(request, auction_id):
     try:
         listing = auctions_listing.objects.get(id=auction_id)
         current_user = request.user.id
-        bid = Bid.objects.filter(bid_list=auction_id).count()
-        if bid > 0:
+        count = Bid.objects.filter(bid_list=auction_id).count()
+        if count >= 1:
             max_bid = Bid.objects.filter(
                 item_bid=auction_id).aggregate(Max('bid'))
             max_bid = max_bid['bid__max']
@@ -123,9 +124,55 @@ def list_pages(request, auction_id):
             watchlist = True
     except auctions_listing.DoesNotExist:
         raise Http404("This Page does not exist")
-    # comments = comment.objects.get(item=auction_id)
-    context = {
-        "bid_form": bid_form,
-        "comment_form": comment_form,
-    }
-    return render(request, "auctions/auctions.html", context)
+    comments = comment.objects.get(item_id=auction_id)
+    listing = auctions_listing.objects.all()
+    if request.method == 'POST':
+        form = bid_form(request.POST)
+        current_user = request.user.id
+        auction_id = request.POST['auction_id']
+        list_item = auctions_listing.objects.get(id=auction_id)
+        user_bid = User.objects.get(id=current_user)
+        listing = auctions_listing.objects.get(id=auction_id)
+        if form.is_valid():
+            current_bid = form.cleaned_data['bid_form']
+            count = Bid.objects.filter(bid_list=auction_id).count()
+            if current_bid >= 1:
+                max_bid = Bid.objects.filter(
+                    bid_list=auction_id).aggregate(Max('bid'))
+                max_bid = max_bid['bid__max']
+            else:
+                max_bid = list_item.start_bid
+            if current_bid >= max_bid:
+                bid = Bid(user_bid=user_bid,
+                          bid_list=list_item.id, bid=current_bid)
+                bid.save()
+                return render(request, "auctions/auctions.html", {
+                    "bid_form": bid_form(),
+                    "comment_form": comment_form(),
+                    "max_bid": max_bid,
+                    "count": count,
+                    "comments": comments,
+                    "lists": list_item,
+                    "success": f"Sucessfull Bid ({current_bid}).",
+                })
+            else:
+                return render(request, "auctions/auctions.html", {
+                    "bid_form": bid_form(),
+                    "comment_form": comment_form(),
+                    "max_bid": max_bid,
+                    "count": count,
+                    "comments": comments,
+                    "lists": list_item,
+                    "error": "Error: The bid can't be less than current bid."
+                })
+        else:
+            return HttpResponseBadRequest("Form not valid")
+    return render(request, 'auctions/auctions.html', {
+        "lists": auctions_listing.objects.get(id=auction_id),
+        "bid_form": bid_form(),
+        "comment_form": comment_form(),
+        "max_bid": max_bid,
+        "count": count,
+        "comments": comments,
+        "watch_list": watchlist,
+    })

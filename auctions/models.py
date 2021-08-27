@@ -46,7 +46,7 @@ class Bid(models.Model):
 class comment(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, name="user", null=True, blank=True)
-    item = models.ForeignKey(
+    item_comment = models.ForeignKey(
         auctions_listing, on_delete=models.CASCADE, name="item", null=True, blank=True)
     comment = models.CharField(max_length=400)
     date = models.DateField(auto_now_add=True, blank=True)

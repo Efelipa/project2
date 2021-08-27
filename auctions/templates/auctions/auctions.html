@@ -2,9 +2,43 @@
 
 {% block body %}
 <div class="container">
-    <h2></h2>
-    {{bid_form}}
-    {{comment_form}}
+    <div>
+        <h2>{{lists.name}}</h2>
+        <span class="badge badge-secondary"><a href="" class="text-white">{{lists.category}}</a></span>
+    </div>
+    <img src="{{lists.image}}" alt="{{list.name}}" height="600px">
+    <div>
+        <h2>Details</h2>
+        <p>Owner: {{lists.owner}}</p>
+        <h4>Description</h4>
+        <p>{{lists.description}}</p>
+    </div>
+    <h4>Current Bid: ${{lists.start_bid}}</h4>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{bid_form}}
+        </div>
+        <div class="form-group">
+            <input class="btn btn-secondary" type="submit" value="Make a Bid">
+        </div>
+    </form>
+    <div class="p-3">
+        <form action="">
+            {% csrf_token %}
+            <div class="form-group">
+                {{comment_form}}
+            </div>
+            <div class="form-group">
+                <input class="btn btn-outline-info" type="submit" value="Comment">
+            </div>
+        </form>
+            <div class="media border p-3 ">
+                <div class="media-body">
+                <h4>{{comments.user}} <small><i>Posted on {{comments.date}}</i></small></h4>
+                <p>{{comments.comment}}</p>
+                </div>
+            </div>
+    </div>
 </div>
-
 {% endblock %}
