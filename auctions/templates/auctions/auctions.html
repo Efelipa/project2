@@ -4,7 +4,7 @@
 <div class="container">
     <div>
         <h2>{{lists.name}}</h2>
-        <span class="badge badge-secondary"><a href="" class="text-white">{{lists.category}}</a></span>
+        <span class="badge badge-secondary"><a href="category/{{lists.category}}" class="text-white">{{lists.category}}</a></span>
     </div>
     <img src="{{lists.image}}" alt="{{list.name}}" height="600px">
     <div>
@@ -24,7 +24,16 @@
         </div>
     </form>
     <div class="p-3">
-        <form action="">
+        <h2>Comments</h2>
+        {% for comment in comments %}
+            <div class="media border p-3 ">
+                <div class="media-body">
+                    <h4>{{comment.user}} <small><i>Posted on {{comment.date}}</i></small></h4>
+                    <p>{{comment.comment}}</p>
+                </div>
+            </div>
+        {% endfor %}
+        <form action="" method="post">
             {% csrf_token %}
             <div class="form-group">
                 {{comment_form}}
@@ -33,12 +42,6 @@
                 <input class="btn btn-outline-info" type="submit" value="Comment">
             </div>
         </form>
-            <div class="media border p-3 ">
-                <div class="media-body">
-                <h4>{{comments.user}} <small><i>Posted on {{comments.date}}</i></small></h4>
-                <p>{{comments.comment}}</p>
-                </div>
-            </div>
     </div>
 </div>
 {% endblock %}

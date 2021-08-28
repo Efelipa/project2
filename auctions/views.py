@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models.expressions import Value
 from django.forms.widgets import Widget
@@ -112,7 +113,7 @@ def list_pages(request, auction_id):
         listing = auctions_listing.objects.get(id=auction_id)
         current_user = request.user.id
         count = Bid.objects.filter(bid_list=auction_id).count()
-        if count >= 1:
+        if count > 0:
             max_bid = Bid.objects.filter(
                 item_bid=auction_id).aggregate(Max('bid'))
             max_bid = max_bid['bid__max']
@@ -124,7 +125,7 @@ def list_pages(request, auction_id):
             watchlist = True
     except auctions_listing.DoesNotExist:
         raise Http404("This Page does not exist")
-    comments = comment.objects.get(item_id=auction_id)
+    comments = comment.objects.filter(item_id=auction_id)
     listing = auctions_listing.objects.all()
     if request.method == 'POST':
         form = bid_form(request.POST)
@@ -171,8 +172,33 @@ def list_pages(request, auction_id):
         "lists": auctions_listing.objects.get(id=auction_id),
         "bid_form": bid_form(),
         "comment_form": comment_form(),
-        "max_bid": max_bid,
-        "count": count,
         "comments": comments,
         "watch_list": watchlist,
+    })
+
+
+# Comment creation
+# def comments(request):
+#     current_user = request.user.id
+#     current_user = User.objects.get(id=current_user)
+#     comment_forms = comment_form(request.POST)
+#     if request.method == 'POST':
+#         auction_id = request.POST['auction_id']
+#         items = auctions_listing.objects.get(id=auction_id)
+#         if comment.is_valid():
+#             current_comment = comment_forms.cleaned_data['comment']
+#             create_comment = comment(
+#                 user=current_user, item_comment=items, comment=current_comment)
+#             create_comment.save()
+#             return HttpResponseRedirect(reverse("list_pages", args=(auction_id)))
+#         else:
+#             raise forms.ValidationError(comment_forms.errors)
+
+
+# Categories
+def category(request, category):
+    categories = auctions_listing.objects.filter(category=category)
+    return render(request, "auctions/category.html", {
+        "category": category,
+        "categories": categories,
     })
