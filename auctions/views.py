@@ -21,7 +21,8 @@ class bid_form(forms.Form):
 class comment_form(forms.Form):
     comment_form = forms.CharField(widget=forms.Textarea(
     ), label='Comment Here')
-    comment_form.widget.attrs.update({"class": "form-control", "rows": "4"})
+    comment_form.widget.attrs.update(
+        {"class": "form-control", "rows": "4"})
 
 
 def index(request):
@@ -107,7 +108,6 @@ def add_auction(request):
 
 
 # Listing Page
-@login_required(login_url='/login')
 def list_pages(request, auction_id):
     try:
         listing = auctions_listing.objects.get(id=auction_id)
@@ -133,17 +133,16 @@ def list_pages(request, auction_id):
         auction_id = request.POST['auction_id']
         list_item = auctions_listing.objects.get(id=auction_id)
         user_bid = User.objects.get(id=current_user)
-        listing = auctions_listing.objects.get(id=auction_id)
         if form.is_valid():
             current_bid = form.cleaned_data['bid_form']
             count = Bid.objects.filter(bid_list=auction_id).count()
-            if current_bid >= 1:
+            if current_bid > 0:
                 max_bid = Bid.objects.filter(
                     bid_list=auction_id).aggregate(Max('bid'))
                 max_bid = max_bid['bid__max']
             else:
                 max_bid = list_item.start_bid
-            if current_bid >= max_bid:
+            if current_bid > max_bid:
                 bid = Bid(user_bid=user_bid,
                           bid_list=list_item.id, bid=current_bid)
                 bid.save()
@@ -178,21 +177,21 @@ def list_pages(request, auction_id):
 
 
 # Comment creation
-# def comments(request):
-#     current_user = request.user.id
-#     current_user = User.objects.get(id=current_user)
-#     comment_forms = comment_form(request.POST)
-#     if request.method == 'POST':
-#         auction_id = request.POST['auction_id']
-#         items = auctions_listing.objects.get(id=auction_id)
-#         if comment.is_valid():
-#             current_comment = comment_forms.cleaned_data['comment']
-#             create_comment = comment(
-#                 user=current_user, item_comment=items, comment=current_comment)
-#             create_comment.save()
-#             return HttpResponseRedirect(reverse("list_pages", args=(auction_id)))
-#         else:
-#             raise forms.ValidationError(comment_forms.errors)
+def comments(request):
+    current_user = request.user.id
+    current_user = User.objects.get(id=current_user)
+    comment_forms = comment_form(request.POST)
+    if request.method == 'POST':
+        auction_id = request.POST['auction_id']
+        items = auctions_listing.objects.get(id=auction_id)
+        if comment_forms.is_valid():
+            current_comment = comment_forms.cleaned_data['comment_form']
+            create_comment = comment(
+                user=current_user, item=items, comment=current_comment)
+            create_comment.save()
+            return HttpResponseRedirect(reverse("list_pages", args=(auction_id)))
+        else:
+            raise forms.ValidationError(comment_forms.errors)
 
 
 # Categories
@@ -202,3 +201,9 @@ def category(request, category):
         "category": category,
         "categories": categories,
     })
+
+
+# # Watch List
+# def watchlist(request):
+#     current_user = request.user.id
+#     if request.method == "POST":

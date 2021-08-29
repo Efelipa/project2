@@ -8,7 +8,15 @@
     </div>
     <img src="{{lists.image}}" alt="{{list.name}}" height="600px">
     <div>
-        <h2>Details</h2>
+        <div class="navbar navbar-expand-sm p-0">
+            <h2 class="m-0">Details</h2>
+            <ul class="navbar-nav ml-auto">
+                <form action="">
+                    {% csrf_token %}
+                    <button class="btn btn-danger">Add to Watchlist</button>
+                </form>
+            </ul>
+        </div>
         <p>Owner: {{lists.owner}}</p>
         <h4>Description</h4>
         <p>{{lists.description}}</p>
@@ -20,7 +28,7 @@
             {{bid_form}}
         </div>
         <div class="form-group">
-            <input class="btn btn-secondary" type="submit" value="Make a Bid">
+            <button class="btn btn-secondary" type="submit" name="auction_id" value="{{lists.id}}">Make a Bid</button>
         </div>
     </form>
     <div class="p-3">
@@ -33,13 +41,13 @@
                 </div>
             </div>
         {% endfor %}
-        <form action="" method="post">
+        <form action="{% url 'comments' %}" method="post">
             {% csrf_token %}
             <div class="form-group">
                 {{comment_form}}
             </div>
             <div class="form-group">
-                <input class="btn btn-outline-info" type="submit" value="Comment">
+                <button class="btn btn-secondary" type="submit" name="auction_id" value="{{lists.id}}">Comment</button>
             </div>
         </form>
     </div>
