@@ -10,18 +10,27 @@
     <div>
         <div class="navbar navbar-expand-sm p-0">
             <h2 class="m-0">Details</h2>
-            <ul class="navbar-nav ml-auto">
-                <form action="">
-                    {% csrf_token %}
-                    <button class="btn btn-danger">Add to Watchlist</button>
-                </form>
-            </ul>
+            {% if watch_state %}
+                <ul class="navbar-nav ml-auto">
+                    <form action="{% url 'watchlist' %}" method="post">
+                        {% csrf_token %}
+                        <button class="btn btn-danger" type="submit" name="auction_id" value="{{lists.id}}">Add to Watchlist</button>
+                    </form>
+                </ul>
+            {% else %}
+                <ul class="navbar-nav ml-auto">
+                    <form action="{% url 'watchlist' %}" method="post">
+                        {% csrf_token %}
+                        <button class="btn btn-outline-secondary" type="submit" name="auction_id" value="{{lists.id}}">Delete Watchlist</button>
+                    </form>
+                </ul>
+            {% endif %}
         </div>
         <p>Owner: {{lists.owner}}</p>
         <h4>Description</h4>
         <p>{{lists.description}}</p>
     </div>
-    <h4>Current Bid: ${{lists.start_bid}}</h4>
+    <h4>Current Bid: <span class="font-weight-bold">${{lists.start_bid}}</span></h4>
     <form action="" method="post">
         {% csrf_token %}
         <div class="form-group">

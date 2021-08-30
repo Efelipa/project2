@@ -126,50 +126,11 @@ def list_pages(request, auction_id):
     except auctions_listing.DoesNotExist:
         raise Http404("This Page does not exist")
     comments = comment.objects.filter(item_id=auction_id)
-    listing = auctions_listing.objects.all()
-    if request.method == 'POST':
-        form = bid_form(request.POST)
-        current_user = request.user.id
-        auction_id = request.POST['auction_id']
-        list_item = auctions_listing.objects.get(id=auction_id)
-        user_bid = User.objects.get(id=current_user)
-        if form.is_valid():
-            current_bid = form.cleaned_data['bid_form']
-            count = Bid.objects.filter(bid_list=auction_id).count()
-            if current_bid > 0:
-                max_bid = Bid.objects.filter(
-                    bid_list=auction_id).aggregate(Max('bid'))
-                max_bid = max_bid['bid__max']
-            else:
-                max_bid = list_item.start_bid
-            if current_bid > max_bid:
-                bid = Bid(user_bid=user_bid,
-                          bid_list=list_item.id, bid=current_bid)
-                bid.save()
-                return render(request, "auctions/auctions.html", {
-                    "bid_form": bid_form(),
-                    "comment_form": comment_form(),
-                    "max_bid": max_bid,
-                    "count": count,
-                    "comments": comments,
-                    "lists": list_item,
-                    "success": f"Sucessfull Bid ({current_bid}).",
-                })
-            else:
-                return render(request, "auctions/auctions.html", {
-                    "bid_form": bid_form(),
-                    "comment_form": comment_form(),
-                    "max_bid": max_bid,
-                    "count": count,
-                    "comments": comments,
-                    "lists": list_item,
-                    "error": "Error: The bid can't be less than current bid."
-                })
-        else:
-            return HttpResponseBadRequest("Form not valid")
     return render(request, 'auctions/auctions.html', {
-        "lists": auctions_listing.objects.get(id=auction_id),
+        "lists": listing,
         "bid_form": bid_form(),
+        "watch_state": watchlist,
+        "max_bid": max_bid,
         "comment_form": comment_form(),
         "comments": comments,
         "watch_list": watchlist,
@@ -203,7 +164,25 @@ def category(request, category):
     })
 
 
-# # Watch List
-# def watchlist(request):
-#     current_user = request.user.id
-#     if request.method == "POST":
+# Watch List
+@login_required(login_url='/login')
+def watchlist(request):
+    current_user = request.user.id
+    if request.method == "POST":
+        auction_id = request.POST['auction_id']
+        watch_user = User.objects.get(id=current_user)
+        list_item = auctions_listing.objects.get(id=auction_id)
+        watching = watch_list(user=watch_user, item=list_item)
+        current_item = watch_list.objects.filter(
+            user=current_user, item=list_item)
+        if current_item.exists():
+            current_item.delete()
+        else:
+            watching.save()
+    watch_id = watch_list.objects.filter(user=current_user)
+    current_watchlist = watch_id.all()
+    listing = auctions_listing.objects.all()
+    return render(request, 'auctions/watchlist.html', {
+        "list_watch": current_watchlist,
+        "listing": listing,
+    })
